@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:nota_app/domain/entities/note.dart';
 import 'package:nota_app/ui/core/constants/app_constants.dart';
 
-class NoteCard extends StatelessWidget {
+class NotaCard extends StatelessWidget {
   final Note note;
 
-  const NoteCard({super.key, required this.note});
+  const NotaCard({super.key, required this.note});
 
   @override
   Widget build(BuildContext context) {

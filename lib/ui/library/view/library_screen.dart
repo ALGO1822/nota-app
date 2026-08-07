@@ -6,8 +6,10 @@ import 'package:nota_app/ui/core/widgets/nota_bar.dart';
 import 'package:nota_app/ui/core/widgets/nota_snack_bar.dart';
 import 'package:nota_app/ui/library/cubit/library_cubit.dart';
 import 'package:nota_app/ui/library/cubit/library_state.dart';
+import 'package:nota_app/ui/library/view/library_empty_state.dart';
+import 'package:nota_app/ui/library/widgets/nota_card.dart';
+import 'package:nota_app/ui/library/widgets/nota_card_skeleton.dart';
 import 'package:nota_app/ui/library/widgets/nota_fab.dart';
-import 'package:nota_app/ui/library/widgets/nota_list.dart';
 
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({super.key});
@@ -17,6 +19,7 @@ class LibraryScreen extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     final List<Note> dummyNotes = [
+      
       const Note(
         id: '1',
         title: 'Structural Biology Basics...',
@@ -32,6 +35,7 @@ class LibraryScreen extends StatelessWidget {
         title: 'Cognitive Load Theory',
         lastAccessed: 'Oct 12',
       ),
+    
     ];
     return Scaffold(
       appBar: NotaAppBar(
@@ -73,14 +77,25 @@ class LibraryScreen extends StatelessWidget {
               );
             },
             builder: (context, state) {
-              return state.maybeWhen(
-                loading: () => const Expanded(
-                  child: Center(child: CircularProgressIndicator()),
+              final isLoading = state.maybeWhen(
+                loading: () => true,
+                orElse: () => false,
+              );
+
+              if (dummyNotes.isEmpty && !isLoading) {
+                return const LibraryEmptyState();
+              }
+              return Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  children: [
+                    if (isLoading) const NotaCardSkeleton(),
+                    ...dummyNotes.map((note) => NotaCard(note: note)),
+                  ],
                 ),
-                orElse: () => NotaList(listItems: dummyNotes),
               );
             },
-          )
+          ),
         ],
       ),
       floatingActionButton: NotaFab(onPressed: () {

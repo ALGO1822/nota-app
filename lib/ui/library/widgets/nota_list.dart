@@ -13,7 +13,7 @@ class NotaList extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         itemCount: listItems.length,
         itemBuilder: (context, index) {
-          return NoteCard(note: listItems[index]);
+          return NotaCard(note: listItems[index]);
         },
       ),
     );
