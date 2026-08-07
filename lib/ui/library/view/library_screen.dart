@@ -11,40 +11,44 @@ class LibraryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    
+
     final List<Note> dummyNotes = [
-      const Note(id: '1', title: 'Structural Biology Basics...', lastAccessed: 'Last read 2h ago'),
-      const Note(id: '2', title: 'System Design Interview Guide', lastAccessed: 'Yesterday'),
-      const Note(id: '3', title: 'Cognitive Load Theory', lastAccessed: 'Oct 12'),
+      const Note(
+        id: '1',
+        title: 'Structural Biology Basics...',
+        lastAccessed: 'Last read 2h ago',
+      ),
+      const Note(
+        id: '2',
+        title: 'System Design Interview Guide',
+        lastAccessed: 'Yesterday',
+      ),
+      const Note(
+        id: '3',
+        title: 'Cognitive Load Theory',
+        lastAccessed: 'Oct 12',
+      ),
     ];
     return Scaffold(
       appBar: NotaAppBar(
         title: 'Nota',
-        onMenuPressed: () {
-          // TODO: Open drawer or handle menu tap
-        },
-        onSearchPressed: () {
-          // TODO: Handle search tap
-        },
+        leading: IconButton(icon: Icon(Icons.menu), onPressed: () {}),
+        actions: [IconButton(icon: Icon(Icons.search), onPressed: () {})],
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, 
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: AppSpacing.xl),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: Text(
-              "LIBRARY",
-              style: textTheme.labelSmall,
-            ),
+            child: Text("LIBRARY", style: textTheme.labelSmall),
           ),
           const SizedBox(height: AppSpacing.md),
-      
-          NotaList(listItems: dummyNotes)
+
+          NotaList(listItems: dummyNotes),
         ],
       ),
       floatingActionButton: NotaFab(onPressed: () {}),
     );
   }
 }
-

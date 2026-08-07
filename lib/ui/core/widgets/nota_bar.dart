@@ -3,14 +3,14 @@ import 'package:nota_app/ui/core/constants/app_constants.dart';
 
 class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final VoidCallback? onMenuPressed;
-  final VoidCallback? onSearchPressed;
+  final Widget? leading;
+  final List<Widget>? actions;
 
   const NotaAppBar({
     super.key,
     required this.title,
-    this.onMenuPressed,
-    this.onSearchPressed,
+    this.leading,
+    this.actions,
   });
 
   @override
@@ -28,12 +28,12 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: Container(
           height: AppSizing.appBarHeight,
           decoration: BoxDecoration(
-            // Maps to AppColorsDark.surface2 in your AppTheme
+            // Maps to AppColorsDark.surface2 in your AppTheme[cite: 3]
             color: colorScheme.surfaceContainerHighest, 
-            // Creates the pill shape (999 radius)
+            // Creates the pill shape (999 radius)[cite: 3]
             borderRadius: AppRadius.pillRadius, 
             border: Border.all(
-              // Maps to AppColorsDark.border in your AppTheme
+              // Maps to AppColorsDark.border in your AppTheme[cite: 3]
               color: colorScheme.outline, 
               width: AppBorders.hairline,
             ),
@@ -41,26 +41,28 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // 1. Leading Icon Area
               Padding(
                 padding: const EdgeInsets.only(left: AppSpacing.sm),
-                child: IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: onMenuPressed,
-                  splashRadius: AppSizing.iconButtonSm,
-                ),
+                // If no leading widget is passed, render an empty box to maintain spacing
+                child: leading ?? const SizedBox(width: AppSizing.iconButtonSm),
               ),
+              
+              // 2. Title Area
               Text(
                 title,
                 style: textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              
+              // 3. Actions Area
               Padding(
                 padding: const EdgeInsets.only(right: AppSpacing.sm),
-                child: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: onSearchPressed,
-                  splashRadius: AppSizing.iconButtonSm,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  // If no actions are passed, render an empty box to maintain balance
+                  children: actions ?? [const SizedBox(width: AppSizing.iconButtonSm)],
                 ),
               ),
             ],
