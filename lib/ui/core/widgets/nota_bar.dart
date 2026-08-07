@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nota_app/ui/core/constants/app_constants.dart';
 
 class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
+  final Widget title; // Changed from String to Widget
   final Widget? leading;
   final List<Widget>? actions;
 
@@ -15,7 +15,6 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Accessing your predefined theme colors
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -28,31 +27,31 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: Container(
           height: AppSizing.appBarHeight,
           decoration: BoxDecoration(
-            // Maps to AppColorsDark.surface2 in your AppTheme[cite: 3]
-            color: colorScheme.surfaceContainerHighest, 
-            // Creates the pill shape (999 radius)[cite: 3]
-            borderRadius: AppRadius.pillRadius, 
+            color: colorScheme.surfaceContainerHighest,
+            borderRadius: AppRadius.pillRadius,
             border: Border.all(
-              // Maps to AppColorsDark.border in your AppTheme[cite: 3]
-              color: colorScheme.outline, 
+              color: colorScheme.outline,
               width: AppBorders.hairline,
             ),
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // 1. Leading Icon Area
               Padding(
                 padding: const EdgeInsets.only(left: AppSpacing.sm),
-                // If no leading widget is passed, render an empty box to maintain spacing
                 child: leading ?? const SizedBox(width: AppSizing.iconButtonSm),
               ),
               
-              // 2. Title Area
-              Text(
-                title,
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+              // 2. Title Area (Expanded to give the search field room to stretch)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  child: Center(
+                    child: DefaultTextStyle(
+                      style: textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+                      child: title,
+                    ),
+                  ),
                 ),
               ),
               
@@ -61,7 +60,6 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
                 padding: const EdgeInsets.only(right: AppSpacing.sm),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  // If no actions are passed, render an empty box to maintain balance
                   children: actions ?? [const SizedBox(width: AppSizing.iconButtonSm)],
                 ),
               ),
@@ -72,7 +70,6 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  // This is required when implementing PreferredSizeWidget
   @override
   Size get preferredSize => const Size.fromHeight(
         AppSizing.appBarHeight + (AppSpacing.sm * 2),

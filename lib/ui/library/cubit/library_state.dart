@@ -16,8 +16,10 @@ sealed class LibraryState with _$LibraryState{
   ) = LibraryImportSuccess;
 
   const factory LibraryState.loaded(
-    List<Note> notes,
+    List<Note> allNotes,
+    List<Note> filteredNotes,
     Set<String> selectedIds,
+    bool isSearching,
   ) = LibraryLoaded;
 
   const factory LibraryState.error(

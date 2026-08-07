@@ -125,6 +125,14 @@ class AppTheme {
       extensions: const [NotaColors.dark],
       textTheme: _buildTextTheme(scheme.onSurface, scheme.onSurfaceVariant),
       dividerColor: AppColorsDark.border,
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppColorsDark.accent,
+        selectionColor: AppColorsDark.accent.withValues(alpha: 0.3),
+        selectionHandleColor: AppColorsDark.accent,
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: AppColorsDark.textPrimary),
+      ),
       appBarTheme: const AppBarTheme(surfaceTintColor: Colors.transparent),
       cardTheme: const CardThemeData(surfaceTintColor: Colors.transparent),
       bottomSheetTheme: const BottomSheetThemeData(

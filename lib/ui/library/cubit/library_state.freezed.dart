@@ -128,13 +128,13 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( File file)?  importSuccess,TResult Function( List<Note> notes,  Set<String> selectedIds)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( File file)?  importSuccess,TResult Function( List<Note> allNotes,  List<Note> filteredNotes,  Set<String> selectedIds,  bool isSearching)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LibraryInitial() when initial != null:
 return initial();case LibraryLoading() when loading != null:
 return loading();case LibraryImportSuccess() when importSuccess != null:
 return importSuccess(_that.file);case LibraryLoaded() when loaded != null:
-return loaded(_that.notes,_that.selectedIds);case LibraryError() when error != null:
+return loaded(_that.allNotes,_that.filteredNotes,_that.selectedIds,_that.isSearching);case LibraryError() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -153,13 +153,13 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( File file)  importSuccess,required TResult Function( List<Note> notes,  Set<String> selectedIds)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( File file)  importSuccess,required TResult Function( List<Note> allNotes,  List<Note> filteredNotes,  Set<String> selectedIds,  bool isSearching)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case LibraryInitial():
 return initial();case LibraryLoading():
 return loading();case LibraryImportSuccess():
 return importSuccess(_that.file);case LibraryLoaded():
-return loaded(_that.notes,_that.selectedIds);case LibraryError():
+return loaded(_that.allNotes,_that.filteredNotes,_that.selectedIds,_that.isSearching);case LibraryError():
 return error(_that.message);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -174,13 +174,13 @@ return error(_that.message);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( File file)?  importSuccess,TResult? Function( List<Note> notes,  Set<String> selectedIds)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( File file)?  importSuccess,TResult? Function( List<Note> allNotes,  List<Note> filteredNotes,  Set<String> selectedIds,  bool isSearching)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case LibraryInitial() when initial != null:
 return initial();case LibraryLoading() when loading != null:
 return loading();case LibraryImportSuccess() when importSuccess != null:
 return importSuccess(_that.file);case LibraryLoaded() when loaded != null:
-return loaded(_that.notes,_that.selectedIds);case LibraryError() when error != null:
+return loaded(_that.allNotes,_that.filteredNotes,_that.selectedIds,_that.isSearching);case LibraryError() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -323,14 +323,21 @@ as File,
 
 
 class LibraryLoaded implements LibraryState {
-  const LibraryLoaded(final  List<Note> notes, final  Set<String> selectedIds): _notes = notes,_selectedIds = selectedIds;
+  const LibraryLoaded(final  List<Note> allNotes, final  List<Note> filteredNotes, final  Set<String> selectedIds, this.isSearching): _allNotes = allNotes,_filteredNotes = filteredNotes,_selectedIds = selectedIds;
   
 
- final  List<Note> _notes;
- List<Note> get notes {
-  if (_notes is EqualUnmodifiableListView) return _notes;
+ final  List<Note> _allNotes;
+ List<Note> get allNotes {
+  if (_allNotes is EqualUnmodifiableListView) return _allNotes;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_notes);
+  return EqualUnmodifiableListView(_allNotes);
+}
+
+ final  List<Note> _filteredNotes;
+ List<Note> get filteredNotes {
+  if (_filteredNotes is EqualUnmodifiableListView) return _filteredNotes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_filteredNotes);
 }
 
  final  Set<String> _selectedIds;
@@ -340,6 +347,7 @@ class LibraryLoaded implements LibraryState {
   return EqualUnmodifiableSetView(_selectedIds);
 }
 
+ final  bool isSearching;
 
 /// Create a copy of LibraryState
 /// with the given fields replaced by the non-null parameter values.
@@ -351,16 +359,16 @@ $LibraryLoadedCopyWith<LibraryLoaded> get copyWith => _$LibraryLoadedCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LibraryLoaded&&const DeepCollectionEquality().equals(other._notes, _notes)&&const DeepCollectionEquality().equals(other._selectedIds, _selectedIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LibraryLoaded&&const DeepCollectionEquality().equals(other._allNotes, _allNotes)&&const DeepCollectionEquality().equals(other._filteredNotes, _filteredNotes)&&const DeepCollectionEquality().equals(other._selectedIds, _selectedIds)&&(identical(other.isSearching, isSearching) || other.isSearching == isSearching));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_notes),const DeepCollectionEquality().hash(_selectedIds));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_allNotes),const DeepCollectionEquality().hash(_filteredNotes),const DeepCollectionEquality().hash(_selectedIds),isSearching);
 
 @override
 String toString() {
-  return 'LibraryState.loaded(notes: $notes, selectedIds: $selectedIds)';
+  return 'LibraryState.loaded(allNotes: $allNotes, filteredNotes: $filteredNotes, selectedIds: $selectedIds, isSearching: $isSearching)';
 }
 
 
@@ -371,7 +379,7 @@ abstract mixin class $LibraryLoadedCopyWith<$Res> implements $LibraryStateCopyWi
   factory $LibraryLoadedCopyWith(LibraryLoaded value, $Res Function(LibraryLoaded) _then) = _$LibraryLoadedCopyWithImpl;
 @useResult
 $Res call({
- List<Note> notes, Set<String> selectedIds
+ List<Note> allNotes, List<Note> filteredNotes, Set<String> selectedIds, bool isSearching
 });
 
 
@@ -388,11 +396,13 @@ class _$LibraryLoadedCopyWithImpl<$Res>
 
 /// Create a copy of LibraryState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? notes = null,Object? selectedIds = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? allNotes = null,Object? filteredNotes = null,Object? selectedIds = null,Object? isSearching = null,}) {
   return _then(LibraryLoaded(
-null == notes ? _self._notes : notes // ignore: cast_nullable_to_non_nullable
+null == allNotes ? _self._allNotes : allNotes // ignore: cast_nullable_to_non_nullable
+as List<Note>,null == filteredNotes ? _self._filteredNotes : filteredNotes // ignore: cast_nullable_to_non_nullable
 as List<Note>,null == selectedIds ? _self._selectedIds : selectedIds // ignore: cast_nullable_to_non_nullable
-as Set<String>,
+as Set<String>,null == isSearching ? _self.isSearching : isSearching // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
