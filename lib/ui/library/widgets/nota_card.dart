@@ -39,7 +39,7 @@ class NotaCard extends StatelessWidget {
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: EdgeInsets.all(isSelected ? AppSpacing.lg - 1 : AppSpacing.lg),
               child: Row(
                 children: [
                   Container(

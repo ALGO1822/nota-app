@@ -80,4 +80,15 @@ class LibraryCubit extends Cubit<LibraryState> {
       orElse: () {},
     );
   }
+
+  void selectAll() {
+    state.maybeWhen(
+      loaded: (notes, _) {
+        // Maps every note ID into a new Set and emits it
+        final allIds = notes.map((n) => n.id).toSet();
+        emit(LibraryState.loaded(notes, allIds));
+      },
+      orElse: () {},
+    );
+  }
 }
