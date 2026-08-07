@@ -55,13 +55,14 @@ extension LibraryStatePatterns on LibraryState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LibraryInitial value)?  initial,TResult Function( LibraryLoading value)?  loading,TResult Function( LibraryImportSuccess value)?  importSuccess,TResult Function( LibraryError value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LibraryInitial value)?  initial,TResult Function( LibraryLoading value)?  loading,TResult Function( LibraryImportSuccess value)?  importSuccess,TResult Function( LibraryLoaded value)?  loaded,TResult Function( LibraryError value)?  error,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case LibraryInitial() when initial != null:
 return initial(_that);case LibraryLoading() when loading != null:
 return loading(_that);case LibraryImportSuccess() when importSuccess != null:
-return importSuccess(_that);case LibraryError() when error != null:
+return importSuccess(_that);case LibraryLoaded() when loaded != null:
+return loaded(_that);case LibraryError() when error != null:
 return error(_that);case _:
   return orElse();
 
@@ -80,13 +81,14 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LibraryInitial value)  initial,required TResult Function( LibraryLoading value)  loading,required TResult Function( LibraryImportSuccess value)  importSuccess,required TResult Function( LibraryError value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LibraryInitial value)  initial,required TResult Function( LibraryLoading value)  loading,required TResult Function( LibraryImportSuccess value)  importSuccess,required TResult Function( LibraryLoaded value)  loaded,required TResult Function( LibraryError value)  error,}){
 final _that = this;
 switch (_that) {
 case LibraryInitial():
 return initial(_that);case LibraryLoading():
 return loading(_that);case LibraryImportSuccess():
-return importSuccess(_that);case LibraryError():
+return importSuccess(_that);case LibraryLoaded():
+return loaded(_that);case LibraryError():
 return error(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -101,13 +103,14 @@ return error(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LibraryInitial value)?  initial,TResult? Function( LibraryLoading value)?  loading,TResult? Function( LibraryImportSuccess value)?  importSuccess,TResult? Function( LibraryError value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LibraryInitial value)?  initial,TResult? Function( LibraryLoading value)?  loading,TResult? Function( LibraryImportSuccess value)?  importSuccess,TResult? Function( LibraryLoaded value)?  loaded,TResult? Function( LibraryError value)?  error,}){
 final _that = this;
 switch (_that) {
 case LibraryInitial() when initial != null:
 return initial(_that);case LibraryLoading() when loading != null:
 return loading(_that);case LibraryImportSuccess() when importSuccess != null:
-return importSuccess(_that);case LibraryError() when error != null:
+return importSuccess(_that);case LibraryLoaded() when loaded != null:
+return loaded(_that);case LibraryError() when error != null:
 return error(_that);case _:
   return null;
 
@@ -125,12 +128,13 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( File file)?  importSuccess,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( File file)?  importSuccess,TResult Function( List<Note> notes,  Set<String> selectedIds)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LibraryInitial() when initial != null:
 return initial();case LibraryLoading() when loading != null:
 return loading();case LibraryImportSuccess() when importSuccess != null:
-return importSuccess(_that.file);case LibraryError() when error != null:
+return importSuccess(_that.file);case LibraryLoaded() when loaded != null:
+return loaded(_that.notes,_that.selectedIds);case LibraryError() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -149,12 +153,13 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( File file)  importSuccess,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( File file)  importSuccess,required TResult Function( List<Note> notes,  Set<String> selectedIds)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case LibraryInitial():
 return initial();case LibraryLoading():
 return loading();case LibraryImportSuccess():
-return importSuccess(_that.file);case LibraryError():
+return importSuccess(_that.file);case LibraryLoaded():
+return loaded(_that.notes,_that.selectedIds);case LibraryError():
 return error(_that.message);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -169,12 +174,13 @@ return error(_that.message);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( File file)?  importSuccess,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( File file)?  importSuccess,TResult? Function( List<Note> notes,  Set<String> selectedIds)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case LibraryInitial() when initial != null:
 return initial();case LibraryLoading() when loading != null:
 return loading();case LibraryImportSuccess() when importSuccess != null:
-return importSuccess(_that.file);case LibraryError() when error != null:
+return importSuccess(_that.file);case LibraryLoaded() when loaded != null:
+return loaded(_that.notes,_that.selectedIds);case LibraryError() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -307,6 +313,86 @@ class _$LibraryImportSuccessCopyWithImpl<$Res>
   return _then(LibraryImportSuccess(
 null == file ? _self.file : file // ignore: cast_nullable_to_non_nullable
 as File,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class LibraryLoaded implements LibraryState {
+  const LibraryLoaded(final  List<Note> notes, final  Set<String> selectedIds): _notes = notes,_selectedIds = selectedIds;
+  
+
+ final  List<Note> _notes;
+ List<Note> get notes {
+  if (_notes is EqualUnmodifiableListView) return _notes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_notes);
+}
+
+ final  Set<String> _selectedIds;
+ Set<String> get selectedIds {
+  if (_selectedIds is EqualUnmodifiableSetView) return _selectedIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableSetView(_selectedIds);
+}
+
+
+/// Create a copy of LibraryState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$LibraryLoadedCopyWith<LibraryLoaded> get copyWith => _$LibraryLoadedCopyWithImpl<LibraryLoaded>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LibraryLoaded&&const DeepCollectionEquality().equals(other._notes, _notes)&&const DeepCollectionEquality().equals(other._selectedIds, _selectedIds));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_notes),const DeepCollectionEquality().hash(_selectedIds));
+
+@override
+String toString() {
+  return 'LibraryState.loaded(notes: $notes, selectedIds: $selectedIds)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $LibraryLoadedCopyWith<$Res> implements $LibraryStateCopyWith<$Res> {
+  factory $LibraryLoadedCopyWith(LibraryLoaded value, $Res Function(LibraryLoaded) _then) = _$LibraryLoadedCopyWithImpl;
+@useResult
+$Res call({
+ List<Note> notes, Set<String> selectedIds
+});
+
+
+
+
+}
+/// @nodoc
+class _$LibraryLoadedCopyWithImpl<$Res>
+    implements $LibraryLoadedCopyWith<$Res> {
+  _$LibraryLoadedCopyWithImpl(this._self, this._then);
+
+  final LibraryLoaded _self;
+  final $Res Function(LibraryLoaded) _then;
+
+/// Create a copy of LibraryState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? notes = null,Object? selectedIds = null,}) {
+  return _then(LibraryLoaded(
+null == notes ? _self._notes : notes // ignore: cast_nullable_to_non_nullable
+as List<Note>,null == selectedIds ? _self._selectedIds : selectedIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,
   ));
 }
 

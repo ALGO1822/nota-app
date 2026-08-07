@@ -12,7 +12,6 @@ class NotaCardSkeleton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Shimmer.fromColors(
-        // Uses your dark theme surface colors for a native, embedded look
         baseColor: colorScheme.surfaceContainerHighest,
         highlightColor: colorScheme.surface,
         child: Container(
@@ -27,7 +26,6 @@ class NotaCardSkeleton extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Ghost Icon Container
               Container(
                 width: 48,
                 height: 48,
@@ -37,8 +35,6 @@ class NotaCardSkeleton extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
-              
-              // Ghost Text Lines
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,7 +49,7 @@ class NotaCardSkeleton extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Container(
-                      width: 120, // Shorter line for the timestamp mockup
+                      width: 120,
                       height: 12,
                       decoration: BoxDecoration(
                         color: Colors.white,

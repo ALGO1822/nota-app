@@ -25,7 +25,7 @@ class NotaSnackBar {
         borderRadius: AppRadius.lgRadius, // Matches your NoteCard corner radius[cite: 3]
         side: BorderSide(
           // Switches to the pure red error token if an error is flagged[cite: 3]
-          color: isError ? colorScheme.error : colorScheme.outline,
+          color: colorScheme.outline,
           width: AppBorders.hairline,
         ),
       ),

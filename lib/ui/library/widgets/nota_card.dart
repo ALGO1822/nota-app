@@ -4,8 +4,17 @@ import 'package:nota_app/ui/core/constants/app_constants.dart';
 
 class NotaCard extends StatelessWidget {
   final Note note;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
-  const NotaCard({super.key, required this.note});
+  const NotaCard({
+    super.key, 
+    required this.note,
+    required this.isSelected,
+    required this.onTap,
+    required this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,55 +22,45 @@ class NotaCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Padding(
-      // Creates the spacing between cards in the list
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: AppRadius.lgRadius,
-          onTap: () {
-            // TODO: Handle note tap, e.g., navigate to note details
-          },
+          onTap: onTap,
+          onLongPress: onLongPress,
           child: Ink(
             decoration: BoxDecoration(
-              // Maps to AppColorsDark.surface[cite: 1]
-              color: colorScheme.surface,
+              color: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : colorScheme.surface,
               borderRadius: AppRadius.lgRadius,
               border: Border.all(
-                // Maps to AppColorsDark.border[cite: 1]
-                color: colorScheme.outline,
-                width: AppBorders.hairline,
+                color: isSelected ? colorScheme.primary : colorScheme.outline,
+                width: isSelected ? 2 : AppBorders.hairline,
               ),
             ),
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Row(
                 children: [
-                  // Icon Container
                   Container(
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      // Maps to AppColorsDark.surface2[cite: 1]
-                      color: colorScheme.surfaceContainerHighest,
+                      color: isSelected ? colorScheme.primary : colorScheme.surfaceContainerHighest,
                       borderRadius: AppRadius.smRadius,
                     ),
                     child: Icon(
-                      Icons.insert_drive_file_outlined,
-                      // Maps to AppColorsDark.textSecondary[cite: 1]
-                      color: colorScheme.onSurfaceVariant,
+                      isSelected ? Icons.check_rounded : Icons.insert_drive_file_outlined,
+                      color: isSelected ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
-
-                  // Text Content
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           note.title,
-                          // Maps to AppTextStyles.body but forces the semibold weight[cite: 1]
                           style: textTheme.bodyLarge?.copyWith(
                             fontWeight: AppFonts.semibold,
                           ),
@@ -71,7 +70,6 @@ class NotaCard extends StatelessWidget {
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           note.lastAccessed,
-                          // Maps to AppTextStyles.meta (textSecondary)[cite: 1]
                           style: textTheme.bodySmall,
                         ),
                       ],
