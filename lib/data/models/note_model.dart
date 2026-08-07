@@ -29,6 +29,7 @@ class NoteModel extends HiveObject {
     return Note(
       id: id,
       title: title,
+      filePath: filePath,
       // For now, we will just format the date to a simple string
       lastAccessed: "${lastAccessed.day}/${lastAccessed.month}/${lastAccessed.year}",
     );

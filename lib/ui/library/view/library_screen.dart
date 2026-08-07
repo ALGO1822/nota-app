@@ -13,6 +13,7 @@ import 'package:nota_app/ui/library/view/library_search_empty_state.dart';
 import 'package:nota_app/ui/library/widgets/nota_card.dart';
 import 'package:nota_app/ui/library/widgets/nota_card_skeleton.dart';
 import 'package:nota_app/ui/library/widgets/nota_fab.dart';
+import 'package:nota_app/ui/reading/view/reading_screen.dart';
 
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({super.key});
@@ -180,7 +181,13 @@ class LibraryScreen extends StatelessWidget {
                             HapticFeedback.selectionClick();
                             context.read<LibraryCubit>().toggleSelection(note.id);
                           } else {
-                            // TODO: Navigate to ReadingScreen
+                            // Route directly to the reading screen, passing the note data
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ReadingScreen(note: note),
+                              ),
+                            );
                           }
                         },
                         onLongPress: () {
