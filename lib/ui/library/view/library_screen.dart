@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nota_app/domain/entities/note.dart';
+import 'package:nota_app/ui/core/animations/nota_animation_library.dart';
 import 'package:nota_app/ui/core/constants/app_constants.dart';
 import 'package:nota_app/ui/core/widgets/nota_bar.dart';
 import 'package:nota_app/ui/core/widgets/nota_dialog.dart';
@@ -23,41 +24,41 @@ class LibraryScreen extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      body: BlocConsumer<LibraryCubit, LibraryState>(
-        listener: (context, state) {
-          state.maybeWhen(
-            importSuccess: (file) {
-              NotaSnackBar.show(context, message: 'Imported: ${file.path.split('/').last}');
-            },
-            error: (message) {
-              NotaSnackBar.show(context, message: message, isError: true);
-            },
-            orElse: () {},
-          );
-        },
-        builder: (context, state) {
-          final isLoading = state.maybeWhen(loading: () => true, orElse: () => false);
-          
-          final List<Note> currentNotes = state.maybeWhen(
-            loaded: (_, filtered, __, ___) => filtered, 
-            orElse: () => [],
-          );
-          final Set<String> selectedIds = state.maybeWhen(
-            loaded: (_, __, selected, ___) => selected, 
-            orElse: () => <String>{},
-          );
-          final bool isSearching = state.maybeWhen(
-            loaded: (_, __, ___, searching) => searching, 
-            orElse: () => false,
-          );
-          
-          final bool isSelectionMode = selectedIds.isNotEmpty;
+    return BlocConsumer<LibraryCubit, LibraryState>(
+      listener: (context, state) {
+        state.maybeWhen(
+          importSuccess: (file) {
+            NotaSnackBar.show(context, message: 'Imported: ${file.path.split('/').last}');
+          },
+          error: (message) {
+            NotaSnackBar.show(context, message: message, isError: true);
+          },
+          orElse: () {},
+        );
+      },
+      builder: (context, state) {
+        final isLoading = state.maybeWhen(loading: () => true, orElse: () => false);
+        
+        final List<Note> currentNotes = state.maybeWhen(
+          loaded: (_, filtered, __, ___) => filtered, 
+          orElse: () => [],
+        );
+        final Set<String> selectedIds = state.maybeWhen(
+          loaded: (_, __, selected, ___) => selected, 
+          orElse: () => <String>{},
+        );
+        final bool isSearching = state.maybeWhen(
+          loaded: (_, __, ___, searching) => searching, 
+          orElse: () => false,
+        );
+        
+        final bool isSelectionMode = selectedIds.isNotEmpty;
 
-          return Column(
+        return Scaffold(
+          resizeToAvoidBottomInset: false, 
+          body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Dynamic AppBar: Morphs based on selection mode or search state
               if (isSelectionMode)
                 NotaAppBar(
                   title: Text('${selectedIds.length} Selected'),
@@ -93,8 +94,11 @@ class LibraryScreen extends StatelessWidget {
                           autofocus: true,
                           style: textTheme.bodyLarge,
                           cursorColor: colorScheme.primary,
+                          textAlignVertical: TextAlignVertical.center, 
                           decoration: InputDecoration(
                             hintText: 'Search library...',
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                             border: InputBorder.none,
                             hintStyle: textTheme.bodyLarge?.copyWith(
                               color: colorScheme.onSurfaceVariant,
@@ -104,7 +108,7 @@ class LibraryScreen extends StatelessWidget {
                         )
                       : const Text('Nota'),
                   leading: isSearching 
-                      ? null
+                      ? null 
                       : PopupMenuButton<String>(
                           icon: Icon(
                             Icons.more_horiz,
@@ -154,7 +158,9 @@ class LibraryScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                  
+              
+              const SizedBox(height: AppSpacing.lg),
+              
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Text("LIBRARY", style: textTheme.labelSmall),
@@ -165,7 +171,7 @@ class LibraryScreen extends StatelessWidget {
                 if (isSearching)
                   const LibrarySearchEmptyState()
                 else
-                  const LibraryEmptyState()  
+                  const LibraryEmptyState()
               else
                 Expanded(
                   child: ListView(
@@ -180,7 +186,6 @@ class LibraryScreen extends StatelessWidget {
                             HapticFeedback.selectionClick();
                             context.read<LibraryCubit>().toggleSelection(note.id);
                           } else {
-                            // Route directly to the reading screen, passing the note data
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -198,22 +203,31 @@ class LibraryScreen extends StatelessWidget {
                   ),
                 ),
             ],
-          );
-        },
-      ),
-      floatingActionButton: BlocBuilder<LibraryCubit, LibraryState>(
-        builder: (context, state) {
-          final isLoading = state.maybeWhen(loading: () => true, orElse: () => false);
-          final currentNotes = state.maybeWhen(loaded: (_, filtered, __, ___) => filtered, orElse: () => []);
-          final selectedIds = state.maybeWhen(loaded: (_, __, selected, ___) => selected, orElse: () => <String>{});
+          ),
           
-          if ((currentNotes.isEmpty && !isLoading) || selectedIds.isNotEmpty) {
-            return const SizedBox.shrink();
-          }
-          
-          return NotaFab(onPressed: () => context.read<LibraryCubit>().importPdf());
-        },
-      ),
+          floatingActionButton: BlocBuilder<LibraryCubit, LibraryState>(
+            builder: (context, state) {
+              final isLoading = state.maybeWhen(loading: () => true, orElse: () => false);
+              final currentNotes = state.maybeWhen(loaded: (_, filtered, __, ___) => filtered, orElse: () => []);
+              final selectedIds = state.maybeWhen(loaded: (_, __, selected, ___) => selected, orElse: () => <String>{});
+              final isSearching = state.maybeWhen(loaded: (_, __, ___, searching) => searching, orElse: () => false);
+              
+              // Show the FAB only when:
+              // - Not searching
+              // - Not selecting items
+              // - Library is not completely empty (because the empty state has its own big import button)
+              final bool showFab = !isSearching && selectedIds.isEmpty && (currentNotes.isNotEmpty || isLoading);
+            
+              return NotaAnimations.slideHideBottom(
+                isVisible: showFab,
+                child: NotaFab(
+                  onPressed: () => context.read<LibraryCubit>().importPdf(),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
