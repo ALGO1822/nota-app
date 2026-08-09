@@ -104,10 +104,10 @@ class LibraryScreen extends StatelessWidget {
                         )
                       : const Text('Nota'),
                   leading: isSearching 
-                      ? const SizedBox(width: AppSizing.iconButtonSm) 
+                      ? null
                       : PopupMenuButton<String>(
                           icon: Icon(
-                            Icons.more_vert,
+                            Icons.more_horiz,
                             color: colorScheme.onSurfaceVariant,
                           ),
                           color: colorScheme.surface,
@@ -155,7 +155,6 @@ class LibraryScreen extends StatelessWidget {
                   ],
                 ),
                   
-              const SizedBox(height: AppSpacing.lg),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Text("LIBRARY", style: textTheme.labelSmall),

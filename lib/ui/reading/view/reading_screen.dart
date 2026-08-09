@@ -3,10 +3,10 @@ import 'package:pdfrx/pdfrx.dart';
 import 'package:nota_app/domain/entities/note.dart';
 import 'package:nota_app/ui/core/widgets/nota_bar.dart';
 import 'package:nota_app/ui/core/constants/app_constants.dart';
+import 'package:nota_app/ui/core/animations/nota_animation_library.dart';
 
 class ReadingScreen extends StatefulWidget {
   final Note note;
-
   const ReadingScreen({super.key, required this.note});
 
   @override
@@ -14,29 +14,27 @@ class ReadingScreen extends StatefulWidget {
 }
 
 class _ReadingScreenState extends State<ReadingScreen> {
-  // 1. Initialize the controller to track the PDF's state
   final PdfViewerController _pdfController = PdfViewerController();
 
   int _currentPage = 1;
   int _totalPages = 0;
+  bool _isAppBarVisible = true;
 
   @override
   void initState() {
     super.initState();
-    // 2. Listen for scroll/page changes
     _pdfController.addListener(_updatePageInfo);
   }
 
   void _updatePageInfo() {
-    // Only update if the document has successfully loaded
     if (_pdfController.isReady) {
-      final newPage = _pdfController.pageNumber;
+      // FIX 1: Provide a fallback of 1 if pageNumber is temporarily null
+      final newPage = _pdfController.pageNumber ?? 1;
       final newTotal = _pdfController.pages.length;
 
-      // Prevent unnecessary UI rebuilds if the page hasn't actually changed
       if (_currentPage != newPage || _totalPages != newTotal) {
         setState(() {
-          _currentPage = newPage!;
+          _currentPage = newPage;
           _totalPages = newTotal;
         });
       }
@@ -45,9 +43,8 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
   @override
   void dispose() {
-    // 3. Always clean up listeners to prevent memory leaks
     _pdfController.removeListener(_updatePageInfo);
-    // _pdfController.dispose();
+    // FIX 2: Removed _pdfController.dispose() as pdfrx handles it internally
     super.dispose();
   }
 
@@ -56,7 +53,6 @@ class _ReadingScreenState extends State<ReadingScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final dynamicBackgroundColor = Theme.of(context).scaffoldBackgroundColor;
-
     final displayTitle = widget.note.title.replaceAll(
       RegExp(r'\.pdf$', caseSensitive: false),
       '',
@@ -64,61 +60,99 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
     return Scaffold(
       backgroundColor: dynamicBackgroundColor,
-      appBar: NotaAppBar(
-        title: Text(
-          displayTitle,
-          style: textTheme.titleLarge?.copyWith(fontWeight: AppFonts.semibold),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            size: 20,
-            color: colorScheme.onSurfaceVariant,
+      extendBodyBehindAppBar: true,
+
+      body: Stack(
+        children: [
+          // 1. Wrap the PDF in a GestureDetector to catch screen taps
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isAppBarVisible = !_isAppBarVisible;
+              });
+            },
+            child: PdfViewer.file(
+              widget.note.filePath,
+              controller: _pdfController,
+              useProgressiveLoading: true,
+              params: PdfViewerParams(
+                backgroundColor: dynamicBackgroundColor,
+                panEnabled: true,
+                scaleEnabled: true,
+                minScale: 0.8,
+                maxScale: 8.0,
+                margin: AppSpacing.md,
+              ),
+            ),
           ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.more_horiz, color: colorScheme.onSurfaceVariant),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: SafeArea(
-        // 4. Wrap in a Stack to float the counter over the document
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: PdfViewer.file(
-                widget.note.filePath,
-                controller: _pdfController, // Attach the controller here
-                useProgressiveLoading: true,
-                params: PdfViewerParams(
-                  backgroundColor: dynamicBackgroundColor,
-                  panEnabled: true,
-                  scaleEnabled: true,
-                  minScale: 0.8,
-                  maxScale: 8.0,
-                  margin: 12,
+
+          // 2. The Animated AppBar with the Gradient Scrim
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            // IgnorePointer prevents the invisible gradient from blocking taps when hidden
+            child: IgnorePointer(
+              ignoring: !_isAppBarVisible,
+              child: NotaAnimations.slideHide(
+                isVisible: _isAppBarVisible,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.black87, Colors.transparent],
+                      stops: [0.0, 1.0],
+                    ),
+                  ),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+                  child: NotaAppBar(
+                    title: Text(
+                      displayTitle,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: AppFonts.semibold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    leading: IconButton(
+                      icon: Icon(
+                        Icons.arrow_back_ios_new,
+                        size: 20,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    actions: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.more_horiz,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
+          ),
 
-            // 5. The Page Counter Overlay
-            if (_totalPages > 0)
-              Positioned(
-                bottom: AppSpacing.lg,
-                right: AppSpacing.lg,
+          // 3. The Animated Page Counter
+          // We wrap this in an AnimatedOpacity so it also vanishes in Focus Mode
+          if (_totalPages > 0)
+            Positioned(
+              bottom: AppSpacing.lg,
+              right: AppSpacing.lg,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: _isAppBarVisible ? 1.0 : 0.0,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
                     vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    // Subtle, blurred background pill for readability
                     color: colorScheme.surfaceContainerHighest.withValues(
                       alpha: 0.85,
                     ),
@@ -134,8 +168,8 @@ class _ReadingScreenState extends State<ReadingScreen> {
                   ),
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
