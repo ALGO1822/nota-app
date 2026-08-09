@@ -59,4 +59,26 @@ class NotaAnimations {
       ),
     );
   }
+
+  static Widget appBarSwitcher({required Widget child}) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          // Adds a subtle horizontal slide to make the morph feel intentional and spatial
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.05, 0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
 }

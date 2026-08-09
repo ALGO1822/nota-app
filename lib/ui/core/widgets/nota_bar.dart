@@ -2,6 +2,50 @@ import 'package:flutter/material.dart';
 import 'package:nota_app/ui/core/constants/app_constants.dart';
 import 'package:nota_app/ui/core/animations/nota_animation_library.dart';
 
+/// A custom, fully-rippling circular button for the App Bar
+class NotaIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final Color? color;
+
+  const NotaIconButton({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return SizedBox(
+      width: AppSizing.appBarHeight,
+      height: AppSizing.appBarHeight,
+      child: Material(
+        color: colorScheme.surfaceContainerHighest,
+        shape: CircleBorder(
+          side: BorderSide(
+            color: colorScheme.outline,
+            width: AppBorders.hairline,
+          ),
+        ),
+        clipBehavior: Clip.antiAlias, // Ensures the ripple perfectly fills the circle
+        child: InkWell(
+          onTap: onPressed,
+          child: Center(
+            child: Icon(
+              icon, 
+              size: 20, 
+              color: color ?? colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget title;
   final Widget? leading;
@@ -33,25 +77,6 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Widget _buildCircle(BuildContext context, Widget child) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return Container(
-      height: AppSizing.appBarHeight,
-      width: AppSizing.appBarHeight,
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: colorScheme.outline,
-          width: AppBorders.hairline,
-        ),
-      ),
-      alignment: Alignment.center,
-      child: child,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -67,16 +92,14 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
           height: AppSizing.appBarHeight,
           child: Row(
             children: [
-              // 1. The Morphing Leading Circle
+              // 1. The Morphing Leading Space
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOutCubic,
-                // Seals the padding gap smoothly as the button vanishes
                 margin: EdgeInsets.only(right: leading != null ? AppSpacing.sm : 0.0),
                 child: NotaAnimations.horizontalCollapse(
                   isVisible: leading != null,
-                  // Passes a dummy circle when null so it shrinks beautifully instead of crashing
-                  child: _buildCircle(context, leading ?? const SizedBox.shrink()),
+                  child: leading ?? const SizedBox.shrink(), 
                 ),
               ),
               
@@ -91,7 +114,7 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
               
-              // 3. Actions Circles
+              // 3. Actions List
               if (actions != null && actions!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(left: AppSpacing.sm),
@@ -101,7 +124,7 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
                       padding: EdgeInsets.only(
                         left: action == actions!.first ? 0 : AppSpacing.sm
                       ),
-                      child: _buildCircle(context, action),
+                      child: action, 
                     )).toList(),
                   ),
                 ),

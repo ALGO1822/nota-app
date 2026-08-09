@@ -19,6 +19,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
   final ValueNotifier<int> _currentPage = ValueNotifier<int>(1);
   final ValueNotifier<int> _totalPages = ValueNotifier<int>(0);
   bool _isAppBarVisible = true;
+  Offset? _tapDownPosition;
 
   @override
   void initState() {
@@ -62,12 +63,21 @@ class _ReadingScreenState extends State<ReadingScreen> {
       body: Stack(
         children: [
           // 1. Wrap the PDF in a GestureDetector to catch screen taps
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _isAppBarVisible = !_isAppBarVisible;
-              });
-            },
+          Listener(
+            onPointerDown: (details) => _tapDownPosition = details.position,
+              onPointerUp: (details) {
+                if (_tapDownPosition != null) {
+                  // Calculate how far the finger dragged
+                  final distance = (details.position - _tapDownPosition!).distance;
+                  
+                  // If it moved less than 10 pixels, it was a tap, not a scroll
+                  if (distance < 10) {
+                    setState(() {
+                      _isAppBarVisible = !_isAppBarVisible;
+                    });
+                  }
+                }
+              },
             child: PdfViewer.file(
               widget.note.filePath,
               controller: _pdfController,
@@ -85,55 +95,47 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
           // 2. The Animated AppBar with the Gradient Scrim
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            // IgnorePointer prevents the invisible gradient from blocking taps when hidden
-            child: IgnorePointer(
-              ignoring: !_isAppBarVisible,
-              child: NotaAnimations.slideHide(
-                isVisible: _isAppBarVisible,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.black87, Colors.transparent],
-                      stops: [0.0, 1.0],
-                    ),
-                  ),
-                  padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
-                  child: NotaAppBar(
-                    title: Text(
-                      displayTitle,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: AppFonts.semibold,
+              top: 0,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(
+                ignoring: !_isAppBarVisible,
+                child: NotaAnimations.slideHide(
+                  isVisible: _isAppBarVisible,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.black87, Colors.transparent],
+                        stops: [0.0, 1.0],
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    leading: IconButton(
-                      icon: Icon(
-                        Icons.arrow_back_ios_new,
-                        size: 20,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                    actions: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.more_horiz,
-                          color: colorScheme.onSurfaceVariant,
+                    padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+                    child: NotaAppBar(
+                      title: Text(
+                        displayTitle,
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: AppFonts.semibold,
                         ),
-                        onPressed: () {},
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
+                      leading: NotaIconButton(
+                        icon: Icons.arrow_back_ios_new, 
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      actions: [
+                        NotaIconButton(
+                          icon: Icons.more_horiz, 
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
 
           // 3. The Animated Page Counter
           // We wrap this in an AnimatedOpacity so it also vanishes in Focus Mode

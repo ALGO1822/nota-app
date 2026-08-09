@@ -230,5 +230,5 @@ class AppSizing {
   static const double iconButtonSm = 30; // app bar icon buttons
   static const double iconButtonMd = 36; // diagram toolbar buttons
   static const double fabSize = 65;
-  static const double appBarHeight = 60;
+  static const double appBarHeight = 55;
 }

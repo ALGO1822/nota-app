@@ -28,7 +28,10 @@ class LibraryScreen extends StatelessWidget {
       listener: (context, state) {
         state.maybeWhen(
           importSuccess: (file) {
-            NotaSnackBar.show(context, message: 'Imported: ${file.path.split('/').last}');
+            NotaSnackBar.show(
+              context,
+              message: 'Imported: ${file.path.split('/').last}',
+            );
           },
           error: (message) {
             NotaSnackBar.show(context, message: message, isError: true);
@@ -37,149 +40,179 @@ class LibraryScreen extends StatelessWidget {
         );
       },
       builder: (context, state) {
-        final isLoading = state.maybeWhen(loading: () => true, orElse: () => false);
-        
+        final isLoading = state.maybeWhen(
+          loading: () => true,
+          orElse: () => false,
+        );
+
         final List<Note> currentNotes = state.maybeWhen(
-          loaded: (_, filtered, __, ___) => filtered, 
+          loaded: (_, filtered, __, ___) => filtered,
           orElse: () => [],
         );
         final Set<String> selectedIds = state.maybeWhen(
-          loaded: (_, __, selected, ___) => selected, 
+          loaded: (_, __, selected, ___) => selected,
           orElse: () => <String>{},
         );
         final bool isSearching = state.maybeWhen(
-          loaded: (_, __, ___, searching) => searching, 
+          loaded: (_, __, ___, searching) => searching,
           orElse: () => false,
         );
-        
+
         final bool isSelectionMode = selectedIds.isNotEmpty;
 
         return Scaffold(
-          resizeToAvoidBottomInset: false, 
-          
+          resizeToAvoidBottomInset: false,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (isSelectionMode)
-                NotaAppBar(
-                  title: Text('${selectedIds.length} Selected'),
-                  leading: IconButton(
-                    icon: const Icon(Icons.close), 
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      context.read<LibraryCubit>().clearSelection();
-                    },
-                  ),
-                  actions: [
-                    IconButton(
-                      icon: Icon(Icons.delete_outline, color: colorScheme.error), 
-                      onPressed: () async {
-                        final bool confirmed = await NotaDialog.showConfirmation(
-                          context,
-                          title: 'Delete Note?',
-                          message: 'Are you sure you want to delete ${selectedIds.length} note(s)? This action cannot be undone and will erase all associated highlights.',
-                          confirmText: 'Delete',
-                        );
-                        
-                        if (confirmed && context.mounted) {
-                          context.read<LibraryCubit>().deleteSelectedNotes();
-                        }
-                      },
-                    )
-                  ],
-                )
-              else
-                NotaAppBar(
-                  // Seamlessly crossfades the inner text to the text field
-                  title: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: isSearching
-                        ? TextField(
-                            key: const ValueKey('search_field'),
-                            autofocus: true,
-                            style: textTheme.bodyLarge,
-                            cursorColor: colorScheme.primary,
-                            textAlignVertical: TextAlignVertical.center, 
-                            decoration: InputDecoration(
-                              hintText: 'Search library...',
-                              isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                              border: InputBorder.none,
-                              hintStyle: textTheme.bodyLarge?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            onChanged: (query) => context.read<LibraryCubit>().search(query),
-                          )
-                        : const Text('Nota', key: ValueKey('title_text')),
-                  ),
-                  
-                  // Passing null triggers the horizontal stretch morph
-                  leading: isSearching 
-                      ? null 
-                      : PopupMenuButton<String>(
-                          icon: Icon(
-                            Icons.more_horiz,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                          color: colorScheme.surface,
-                          position: PopupMenuPosition.under,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: AppRadius.lgRadius,
-                            side: BorderSide(
-                              color: colorScheme.outline,
-                              width: AppBorders.hairline,
-                            ),
-                          ),
-                          onSelected: (value) {
-                            if (value == 'select_all') {
-                              context.read<LibraryCubit>().selectAll();
-                            }
+              NotaAnimations.appBarSwitcher(
+                child: isSelectionMode
+                    ? NotaAppBar(
+                        key: const ValueKey('selection_bar'),
+                        title: Text('${selectedIds.length} Selected'),
+                        leading: NotaIconButton(
+                          icon: Icons.close,
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            context.read<LibraryCubit>().clearSelection();
                           },
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'select_all',
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.checklist,
+                        ),
+                        actions: [
+                          NotaIconButton(
+                            icon: Icons.delete_outline,
+                            color: colorScheme.error,
+                            onPressed: () async {
+                              final bool confirmed = await NotaDialog.showConfirmation(
+                                context,
+                                title: 'Delete Note?',
+                                message: 'Are you sure you want to delete ${selectedIds.length} note(s)? This action cannot be undone and will erase all associated highlights.',
+                                confirmText: 'Delete',
+                              );
+
+                              if (confirmed && context.mounted) {
+                                context.read<LibraryCubit>().deleteSelectedNotes();
+                              }
+                            },
+                          ),
+                        ],
+                      )
+                    : (isSearching
+                        ? NotaAppBar(
+                            key: const ValueKey('search_bar'),
+                            title: TextField(
+                              key: const ValueKey('search_field'),
+                              autofocus: true,
+                              style: textTheme.bodyLarge,
+                              cursorColor: colorScheme.primary,
+                              textAlignVertical: TextAlignVertical.center,
+                              decoration: InputDecoration(
+                                hintText: 'Search library...',
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.md,
+                                ),
+                                border: InputBorder.none,
+                                hintStyle: textTheme.bodyLarge?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              onChanged: (query) =>
+                                  context.read<LibraryCubit>().search(query),
+                            ),
+                            leading: null,
+                            actions: [
+                              NotaIconButton(
+                                icon: Icons.close,
+                                onPressed: () =>
+                                    context.read<LibraryCubit>().toggleSearch(),
+                              ),
+                            ],
+                          )
+                        : NotaAppBar(
+                            key: const ValueKey('default_bar'),
+                            title: const Text(
+                              'Nota',
+                              key: ValueKey('title_text'),
+                            ),
+                            // 1. Wrap the PopupMenuButton directly in a bounded Material node
+                            leading: SizedBox(
+                              width: AppSizing.appBarHeight,
+                              height: AppSizing.appBarHeight,
+                              child: Material(
+                                color: colorScheme.surfaceContainerHighest,
+                                shape: CircleBorder(
+                                  side: BorderSide(
+                                    color: colorScheme.outline,
+                                    width: AppBorders.hairline,
+                                  ),
+                                ),
+                                clipBehavior: Clip.antiAlias, // Clips the menu's internal ripple
+                                child: PopupMenuButton<String>(
+                                  elevation: 0,
+                                  padding: EdgeInsets.zero,
+                                  icon: Icon(
+                                    Icons.more_horiz,
                                     size: 20,
                                     color: colorScheme.onSurfaceVariant,
                                   ),
-                                  const SizedBox(width: AppSpacing.md),
-                                  Text(
-                                    'Select All',
-                                    style: textTheme.bodyLarge,
+                                  color: colorScheme.surface,
+                                  position: PopupMenuPosition.under,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: AppRadius.lgRadius,
+                                    side: BorderSide(
+                                      color: colorScheme.outline,
+                                      width: AppBorders.hairline,
+                                    ),
                                   ),
-                                ],
+                                  onSelected: (value) {
+                                    if (value == 'select_all') {
+                                      context.read<LibraryCubit>().selectAll();
+                                    }
+                                  },
+                                  itemBuilder: (context) => [
+                                    PopupMenuItem(
+                                      value: 'select_all',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.checklist,
+                                            size: 20,
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                          const SizedBox(width: AppSpacing.md),
+                                          Text(
+                                            'Select All',
+                                            style: textTheme.bodyLarge,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ],
-                        ),
-                  actions: [
-                    // Crossfades the search icon into a close icon
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: IconButton(
-                        key: ValueKey(isSearching ? 'close_btn' : 'search_btn'),
-                        icon: Icon(
-                          isSearching ? Icons.close : Icons.search,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        onPressed: () => context.read<LibraryCubit>().toggleSearch(),
-                      ),
-                    ),
-                  ],
-                ),
-                
+                            actions: [
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 300),
+                                child: NotaIconButton(
+                                  key: ValueKey(
+                                    isSearching ? 'close_btn' : 'search_btn',
+                                  ),
+                                  icon: isSearching ? Icons.close : Icons.search,
+                                  onPressed: () => context
+                                      .read<LibraryCubit>()
+                                      .toggleSearch(),
+                                ),
+                              ),
+                            ],
+                          )),
+              ),
               const SizedBox(height: AppSpacing.lg),
-              
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 child: Text("LIBRARY", style: textTheme.labelSmall),
               ),
               const SizedBox(height: AppSpacing.md),
-
               if (currentNotes.isEmpty && !isLoading)
                 if (isSearching)
                   const LibrarySearchEmptyState()
@@ -187,13 +220,14 @@ class LibraryScreen extends StatelessWidget {
                   const LibraryEmptyState()
               else
                 Expanded(
-                  // PERFORMANCE FIX: ListView.builder prevents memory crashes on large libraries
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                    ),
                     itemCount: isLoading ? 1 : currentNotes.length,
                     itemBuilder: (context, index) {
                       if (isLoading) return const NotaCardSkeleton();
-                      
+
                       final note = currentNotes[index];
                       return NotaCard(
                         note: note,
@@ -201,7 +235,9 @@ class LibraryScreen extends StatelessWidget {
                         onTap: () {
                           if (isSelectionMode) {
                             HapticFeedback.selectionClick();
-                            context.read<LibraryCubit>().toggleSelection(note.id);
+                            context.read<LibraryCubit>().toggleSelection(
+                              note.id,
+                            );
                           } else {
                             Navigator.push(
                               context,
@@ -221,16 +257,30 @@ class LibraryScreen extends StatelessWidget {
                 ),
             ],
           ),
-          
           floatingActionButton: BlocBuilder<LibraryCubit, LibraryState>(
             builder: (context, state) {
-              final isLoading = state.maybeWhen(loading: () => true, orElse: () => false);
-              final currentNotes = state.maybeWhen(loaded: (_, filtered, __, ___) => filtered, orElse: () => []);
-              final selectedIds = state.maybeWhen(loaded: (_, __, selected, ___) => selected, orElse: () => <String>{});
-              final isSearching = state.maybeWhen(loaded: (_, __, ___, searching) => searching, orElse: () => false);
-              
-              final bool showFab = !isSearching && selectedIds.isEmpty && (currentNotes.isNotEmpty || isLoading);
-              
+              final isLoading = state.maybeWhen(
+                loading: () => true,
+                orElse: () => false,
+              );
+              final currentNotes = state.maybeWhen(
+                loaded: (_, filtered, __, ___) => filtered,
+                orElse: () => [],
+              );
+              final selectedIds = state.maybeWhen(
+                loaded: (_, __, selected, ___) => selected,
+                orElse: () => <String>{},
+              );
+              final isSearching = state.maybeWhen(
+                loaded: (_, __, ___, searching) => searching,
+                orElse: () => false,
+              );
+
+              final bool showFab =
+                  !isSearching &&
+                  selectedIds.isEmpty &&
+                  (currentNotes.isNotEmpty || isLoading);
+
               return NotaAnimations.slideHideBottom(
                 isVisible: showFab,
                 child: NotaFab(
