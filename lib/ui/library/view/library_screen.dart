@@ -56,6 +56,7 @@ class LibraryScreen extends StatelessWidget {
 
         return Scaffold(
           resizeToAvoidBottomInset: false, 
+          
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -89,24 +90,31 @@ class LibraryScreen extends StatelessWidget {
                 )
               else
                 NotaAppBar(
-                  title: isSearching
-                      ? TextField(
-                          autofocus: true,
-                          style: textTheme.bodyLarge,
-                          cursorColor: colorScheme.primary,
-                          textAlignVertical: TextAlignVertical.center, 
-                          decoration: InputDecoration(
-                            hintText: 'Search library...',
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                            border: InputBorder.none,
-                            hintStyle: textTheme.bodyLarge?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
+                  // Seamlessly crossfades the inner text to the text field
+                  title: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: isSearching
+                        ? TextField(
+                            key: const ValueKey('search_field'),
+                            autofocus: true,
+                            style: textTheme.bodyLarge,
+                            cursorColor: colorScheme.primary,
+                            textAlignVertical: TextAlignVertical.center, 
+                            decoration: InputDecoration(
+                              hintText: 'Search library...',
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                              border: InputBorder.none,
+                              hintStyle: textTheme.bodyLarge?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
                             ),
-                          ),
-                          onChanged: (query) => context.read<LibraryCubit>().search(query),
-                        )
-                      : const Text('Nota'),
+                            onChanged: (query) => context.read<LibraryCubit>().search(query),
+                          )
+                        : const Text('Nota', key: ValueKey('title_text')),
+                  ),
+                  
+                  // Passing null triggers the horizontal stretch morph
                   leading: isSearching 
                       ? null 
                       : PopupMenuButton<String>(
@@ -149,16 +157,21 @@ class LibraryScreen extends StatelessWidget {
                           ],
                         ),
                   actions: [
-                    IconButton(
-                      icon: Icon(
-                        isSearching ? Icons.close : Icons.search,
-                        color: colorScheme.onSurfaceVariant,
+                    // Crossfades the search icon into a close icon
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: IconButton(
+                        key: ValueKey(isSearching ? 'close_btn' : 'search_btn'),
+                        icon: Icon(
+                          isSearching ? Icons.close : Icons.search,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        onPressed: () => context.read<LibraryCubit>().toggleSearch(),
                       ),
-                      onPressed: () => context.read<LibraryCubit>().toggleSearch(),
                     ),
                   ],
                 ),
-              
+                
               const SizedBox(height: AppSpacing.lg),
               
               Padding(
@@ -174,11 +187,15 @@ class LibraryScreen extends StatelessWidget {
                   const LibraryEmptyState()
               else
                 Expanded(
-                  child: ListView(
+                  // PERFORMANCE FIX: ListView.builder prevents memory crashes on large libraries
+                  child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                    children: [
-                      if (isLoading) const NotaCardSkeleton(),
-                      ...currentNotes.map((note) => NotaCard(
+                    itemCount: isLoading ? 1 : currentNotes.length,
+                    itemBuilder: (context, index) {
+                      if (isLoading) return const NotaCardSkeleton();
+                      
+                      final note = currentNotes[index];
+                      return NotaCard(
                         note: note,
                         isSelected: selectedIds.contains(note.id),
                         onTap: () {
@@ -198,8 +215,8 @@ class LibraryScreen extends StatelessWidget {
                           HapticFeedback.selectionClick();
                           context.read<LibraryCubit>().toggleSelection(note.id);
                         },
-                      )),
-                    ],
+                      );
+                    },
                   ),
                 ),
             ],
@@ -212,12 +229,8 @@ class LibraryScreen extends StatelessWidget {
               final selectedIds = state.maybeWhen(loaded: (_, __, selected, ___) => selected, orElse: () => <String>{});
               final isSearching = state.maybeWhen(loaded: (_, __, ___, searching) => searching, orElse: () => false);
               
-              // Show the FAB only when:
-              // - Not searching
-              // - Not selecting items
-              // - Library is not completely empty (because the empty state has its own big import button)
               final bool showFab = !isSearching && selectedIds.isEmpty && (currentNotes.isNotEmpty || isLoading);
-            
+              
               return NotaAnimations.slideHideBottom(
                 isVisible: showFab,
                 child: NotaFab(

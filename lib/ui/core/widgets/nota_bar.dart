@@ -14,7 +14,6 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
   });
 
-  /// Helper to wrap the title in a wide pill
   Widget _buildPill(BuildContext context, Widget child) {
     final colorScheme = Theme.of(context).colorScheme;
     
@@ -34,16 +33,15 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  /// Helper to wrap individual icon buttons in a perfect circle
   Widget _buildCircle(BuildContext context, Widget child) {
     final colorScheme = Theme.of(context).colorScheme;
     
     return Container(
       height: AppSizing.appBarHeight,
-      width: AppSizing.appBarHeight, // Locking width to height creates a perfect square base
+      width: AppSizing.appBarHeight,
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
-        shape: BoxShape.circle, // Forces the container into a perfect circle
+        shape: BoxShape.circle,
         border: Border.all(
           color: colorScheme.outline,
           width: AppBorders.hairline,
@@ -69,16 +67,20 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
           height: AppSizing.appBarHeight,
           child: Row(
             children: [
-              // 1. Morphing Leading Circle
-              NotaAnimations.sizeFade(
-                isVisible: leading != null,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: AppSpacing.sm),
-                  child: leading != null ? _buildCircle(context, leading!) : const SizedBox.shrink(),
+              // 1. The Morphing Leading Circle
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOutCubic,
+                // Seals the padding gap smoothly as the button vanishes
+                margin: EdgeInsets.only(right: leading != null ? AppSpacing.sm : 0.0),
+                child: NotaAnimations.horizontalCollapse(
+                  isVisible: leading != null,
+                  // Passes a dummy circle when null so it shrinks beautifully instead of crashing
+                  child: _buildCircle(context, leading ?? const SizedBox.shrink()),
                 ),
               ),
               
-              // 2. Expanded Title Pill
+              // 2. The Stretching Title/Search Pill
               Expanded(
                 child: _buildPill(
                   context, 
@@ -89,18 +91,20 @@ class NotaAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
               
-              // 3. Morphing Actions Circles
-              NotaAnimations.sizeFade(
-                isVisible: actions != null && actions!.isNotEmpty,
-                // Map over the actions list and give every icon its own perfect circle
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: actions?.map((action) => Padding(
-                    padding: const EdgeInsets.only(left: AppSpacing.sm),
-                    child: _buildCircle(context, action),
-                  )).toList() ?? [],
+              // 3. Actions Circles
+              if (actions != null && actions!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: AppSpacing.sm),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: actions!.map((action) => Padding(
+                      padding: EdgeInsets.only(
+                        left: action == actions!.first ? 0 : AppSpacing.sm
+                      ),
+                      child: _buildCircle(context, action),
+                    )).toList(),
+                  ),
                 ),
-              ),
             ],
           ),
         ),

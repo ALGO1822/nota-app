@@ -16,8 +16,8 @@ class ReadingScreen extends StatefulWidget {
 class _ReadingScreenState extends State<ReadingScreen> {
   final PdfViewerController _pdfController = PdfViewerController();
 
-  int _currentPage = 1;
-  int _totalPages = 0;
+  final ValueNotifier<int> _currentPage = ValueNotifier<int>(1);
+  final ValueNotifier<int> _totalPages = ValueNotifier<int>(0);
   bool _isAppBarVisible = true;
 
   @override
@@ -28,23 +28,20 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
   void _updatePageInfo() {
     if (_pdfController.isReady) {
-      // FIX 1: Provide a fallback of 1 if pageNumber is temporarily null
       final newPage = _pdfController.pageNumber ?? 1;
       final newTotal = _pdfController.pages.length;
-
-      if (_currentPage != newPage || _totalPages != newTotal) {
-        setState(() {
-          _currentPage = newPage;
-          _totalPages = newTotal;
-        });
-      }
+      
+      // Update values directly; no setState required!
+      if (_currentPage.value != newPage) _currentPage.value = newPage;
+      if (_totalPages.value != newTotal) _totalPages.value = newTotal;
     }
   }
 
   @override
   void dispose() {
     _pdfController.removeListener(_updatePageInfo);
-    // FIX 2: Removed _pdfController.dispose() as pdfrx handles it internally
+    _currentPage.dispose();
+    _totalPages.dispose();
     super.dispose();
   }
 
@@ -140,35 +137,42 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
           // 3. The Animated Page Counter
           // We wrap this in an AnimatedOpacity so it also vanishes in Focus Mode
-          if (_totalPages > 0)
-            Positioned(
-              bottom: AppSpacing.lg,
-              right: AppSpacing.lg,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 300),
-                opacity: _isAppBarVisible ? 1.0 : 0.0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.85,
+          ValueListenableBuilder<int>(
+            valueListenable: _totalPages,
+            builder: (context, total, _) {
+              if (total == 0) return const SizedBox.shrink();
+              
+              return Positioned(
+                bottom: AppSpacing.lg,
+                right: AppSpacing.lg,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: _isAppBarVisible ? 1.0 : 0.0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.85),
+                      borderRadius: AppRadius.pillRadius,
                     ),
-                    borderRadius: AppRadius.pillRadius,
-                  ),
-                  child: Text(
-                    '$_currentPage / $_totalPages',
-                    style: textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: AppFonts.medium,
-                      letterSpacing: 0.5,
+                    // Listen to the current page as well
+                    child: ValueListenableBuilder<int>(
+                      valueListenable: _currentPage,
+                      builder: (context, current, _) {
+                        return Text(
+                          '$current / $total',
+                          style: textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontWeight: AppFonts.medium,
+                            letterSpacing: 0.5,
+                          ),
+                        );
+                      }
                     ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
+          ),
         ],
       ),
     );
